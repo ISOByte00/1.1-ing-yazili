@@ -27,7 +27,7 @@ Ardından `http://localhost:8000` adresine gidin.
 
 ## GitHub'a yükleme ve GitHub Pages
 
-1. Site dosyaları şu depoda tutulur: **https://github.com/ISOByte00/1.1-ing-yazili**.
+1. GitHub hesabında **New repository** seçin. İsim için `1.1-ing-yazili` kullanın. Repo adı GitHub'da boşluk içeremez; istenen “1.1 ing yazili” adı bu biçimde yazılabilir.
 2. Bu klasördeki `index.html`, `styles.css`, `data.js`, `app.js`, `.nojekyll` ve `README.md` dosyalarını (isteğe bağlı `tests` klasörüyle) yeni deponun **kök dizinine** yükleyin. **ZIP dosyasını tek başına yüklemeyin**; önce açın.
 3. `Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: main / (root) → Save` ayarlarını uygulayın.
 4. GitHub Pages adresinin oluşmasını bekleyin. Tipik adres `https://KULLANICI.github.io/1.1-ing-yazili/` şeklindedir, ancak yayımlama tamamlanmadan bağlantı çalışmaz.
@@ -43,7 +43,7 @@ git remote add origin https://github.com/ISOByte00/1.1-ing-yazili.git
 git push -u origin main
 ```
 
-**Yayın adresi:** `https://isobyte00.github.io/1.1-ing-yazili/` (Pages etkinleştirildikten sonra).
+> Bağlantılı GitHub eklentisinin bu sohbetteki yetenekleri mevcut repolara dosya ekleyebiliyor ama **yeni repo oluşturamıyor**. Yeni repo oluşturulduktan sonra repo içine dosya yazılabilir.
 
 ## İçerik sınırları ve kaynak
 
