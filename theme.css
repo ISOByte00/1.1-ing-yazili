@@ -180,15 +180,15 @@ body.dark .no-pad{background:var(--card)}
 }
 @media(max-width:800px){
  .sidebar,body.dark .sidebar{width:264px}.topbar{padding:0 17px}
- main,#view{padding:23px 18px 48px}.hero{padding:26px 24px}.hero h1{font-size:34px}
+ main,#view{padding:23px 18px 48px}.hero,body.dark .hero{padding:26px 24px}.hero h1,body.dark .hero h1{font-size:34px}
  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.study-columns{grid-template-columns:1fr}
- .audio-item{grid-template-columns:40px minmax(0,1fr)}
+ .audio-item,body.dark .audio-item{grid-template-columns:40px minmax(0,1fr)}
  .audio-actions{grid-column:2;align-items:flex-start;flex-direction:row;flex-wrap:wrap}
 }
 @media(max-width:560px){
  main,#view{padding:19px 13px 44px}.topbar{height:60px}.top-actions{font-size:0}.top-reset{font-size:11px}
- .hero{padding:22px 17px;border-left-width:4px}.hero h1{font-size:29px}.hero .btn{flex:1}
- .card,.content-box,.check-question{padding:17px}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:24px}
+ .hero,body.dark .hero{padding:22px 17px;border-left-width:4px}.hero h1,body.dark .hero h1{font-size:29px}.hero .btn{flex:1}
+ .card,.content-box,.check-question,body.dark .card,body.dark .content-box,body.dark .check-question{padding:17px}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:24px}
  .compare-grid{grid-template-columns:1fr}.mode-grid,.exam-modes{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
  .mode-card{padding:12px;min-height:108px}.voice-form{grid-template-columns:1fr}
  .phrase{grid-template-columns:minmax(0,1fr) minmax(0,.8fr) 22px;gap:6px}.phrase span{font-size:11px}
