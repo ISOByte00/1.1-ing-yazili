@@ -62,3 +62,23 @@ git push -u origin main
 - `tests/validate-content.cjs`: veri bütünlüğü kontrolleri (`node tests/validate-content.cjs`)
 
 **Herhangi bir çatı, bağımlılık veya API anahtarı gerekmez.**
+## v3 — daha sade arayüz, daha iyi ses
+
+- 1.00× hız ve yalnız İngilizce varsayılan. Ses motoru / hız / dil tercihi bu tarayıcıda kaydedilir.
+- Tarayıcı sesinde mevcutsa Google, Microsoft Natural gibi daha iyi seçeneklere öncelik verilir. Yüklü olmayan sesler otomatik edinilemez.
+- Google Cloud Chirp 3 HD entegrasyonu isteğe bağlıdır. Ücretli API için anahtar asla GitHub Pages koduna yazılmaz.
+
+### Google Cloud TTS kurulumu
+
+1. Google Cloud projesinde **Cloud Text-to-Speech API** hizmetini etkinleştir; faturalandırmayı ve kullanım kotasını kontrol et.
+2. API anahtarını yalnız **Cloud Text-to-Speech API** için sınırlandır. GitHub'a, web sitesi dosyalarına veya tarayıcıdaki giriş alanına yapıştırma.
+3. Cloudflare Workers üzerinde yeni bir Worker oluştur ve bu repodaki `cloud-tts-worker.js` kodunu yayımla.
+4. Worker için `GOOGLE_TTS_API_KEY` adında **Secret** oluştur; değerine Google API anahtarını gir. `ALLOWED_ORIGIN` ortam değişkenini `https://isobyte00.github.io` yap.
+5. Cloudflare'de hız sınırı / WAF kuralı koy ve Google Cloud fatura uyarılarını + API kotalarını sınırlandır. **CORS kimlik doğrulaması değildir**; herkese açık bir Worker kötüye kullanılabilir.
+6. Sitede **Sarı Kelimeler → Ses motoru → Google Cloud** seç ve Worker URL'sini (ör. `https://...workers.dev`) gir. Bu alan yalnızca Worker URL'si içindir, API anahtarı değil.
+7. Herhangi bir kelimenin ses düğmesini test et. Google Cloud olmadan tarayıcı modu ücretsiz çalışmaya devam eder.
+
+**Yeni dosyalar:** `tts.js` (ses seçimi ve dinleme), `cloud-tts-worker.js` (Google API gizli anahtarını sunucuda tutan isteğe bağlı köprü). Mevcut çalışma ilerlemesi ve sorular korunur.
+
+Google Cloud sesleri ve fiyatlandırma: https://cloud.google.com/text-to-speech
+Cloudflare secret yönetimi: https://developers.cloudflare.com/workers/configuration/secrets/
