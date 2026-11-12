@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="11. Sınıf İngilizce 1. ve 2. ünite: konu anlatımı, prefer/would rather, will/going to, sarı kelimeler, EBA dinleme bağlantıları ve interaktif deneme." />
+  <meta name="theme-color" content="#f7f8fc" />
+  <title>1.1 İngilizce Yazılı — Study Lab</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="data.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand" aria-label="Study Lab">
+        <div class="brand-mark">S<span>.</span></div>
+        <div><strong>STUDY LAB</strong><small>11. SINIF · İNGİLİZCE</small></div>
+      </div>
+      <div class="side-label">ÇALIŞMA ALANI</div>
+      <nav class="nav" aria-label="Ana menü" id="navigation">
+        <button data-route="home" class="nav-item active"><span class="nav-icon">⌂</span><span>Genel Bakış</span></button>
+        <button data-route="lessons" class="nav-item"><span class="nav-icon">▤</span><span>Konu Anlatımları</span></button>
+        <button data-route="vocab" class="nav-item"><span class="nav-icon">✦</span><span>Sarı Kelimeler</span></button>
+        <button data-route="practice" class="nav-item"><span class="nav-icon">◎</span><span>Alıştırma Merkezi</span></button>
+        <button data-route="reading" class="nav-item"><span class="nav-icon">▣</span><span>Okuma Rehberi</span></button>
+        <button data-route="audio" class="nav-item"><span class="nav-icon">♫</span><span>Dinleme Rehberi</span></button>
+        <button data-route="exam" class="nav-item"><span class="nav-icon">✓</span><span>Yazılı Provası</span></button>
+      </nav>
+      <div class="side-bottom">
+        <div class="sidebar-progress"><div class="side-label">ÇALIŞMA İLERLEMESİ</div><div class="progress-big"><span id="sidebar-progress-pct">0%</span><span>tamamlandı</span></div><div class="progress-track"><span id="sidebar-progress-bar"></span></div></div>
+        <button class="minor-button" id="theme-toggle">☾ &nbsp; Görünümü değiştir</button>
+        <div class="source-note">Kaynak: Yıldırım 11. sınıf<br>Kitap s. 9–36 · PDF s. 1–28</div>
+      </div>
+    </aside>
+    <div class="main-wrap">
+      <header class="topbar">
+        <button id="menu-toggle" class="icon-button mobile-only" aria-label="Menüyü aç">☰</button>
+        <div class="crumb">11. Sınıf <span>/</span> İngilizce <span>/</span> <strong id="crumb-current">Genel Bakış</strong></div>
+        <div class="top-actions"><span class="dot-live"></span><span>Yerel kayıt aktif</span><button id="reset-button" class="top-reset" title="Çalışma verilerini sıfırla">Sıfırla</button></div>
+      </header>
+      <main id="view" tabindex="-1" aria-live="polite"></main>
+      <footer>Study Lab · Yıldırım 11. Sınıf İngilizce 1–2. Ünite · Bağımsız çalışma aracı. Resmî seslere EBA QR bağlantılarıyla erişilir.</footer>
+    </div>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="menu-shade" class="menu-shade"></div>
+</body>
+</html>
