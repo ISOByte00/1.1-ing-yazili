@@ -65,19 +65,63 @@ async function browserSay(text,lang,rate,id){
   try{speechSynthesis.speak(u);}catch(_){finish(false);}
  });
 }
+// Store successful Cloud TTS responses locally. The Worker and API configuration stay unchanged.
+const audioMemory=new Map();
+let voiceCachePromise;
+function voiceCacheDB(){
+ if(voiceCachePromise)return voiceCachePromise;
+ if(!('indexedDB' in window))return Promise.resolve(null);
+ voiceCachePromise=new Promise(resolve=>{
+  try{
+   const req=indexedDB.open('isobyte_cloud_tts_audio_v1',1);
+   req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('clips'))req.result.createObjectStore('clips');};
+   req.onsuccess=()=>resolve(req.result);
+   req.onerror=()=>resolve(null);
+   req.onblocked=()=>resolve(null);
+  }catch(_){resolve(null);}
+ });
+ return voiceCachePromise;
+}
+async function readCachedAudio(key){
+ if(audioMemory.has(key))return audioMemory.get(key);
+ const db=await voiceCacheDB();if(!db)return null;
+ return new Promise(resolve=>{
+  try{
+   const req=db.transaction('clips','readonly').objectStore('clips').get(key);
+   req.onsuccess=()=>{
+    const blob=req.result;
+    if(blob instanceof Blob){audioMemory.set(key,blob);resolve(blob);}
+    else resolve(null);
+   };
+   req.onerror=()=>resolve(null);
+  }catch(_){resolve(null);}
+ });
+}
+async function saveCachedAudio(key,blob){
+ audioMemory.set(key,blob);
+ const db=await voiceCacheDB();if(!db)return;
+ try{db.transaction('clips','readwrite').objectStore('clips').put(blob,key);}catch(_){}
+}
 async function cloudSay(text,lang,rate,id){
  const url=prefs.endpoint;
  if(!/^https:\/\/[a-z0-9.-]+(?::\d+)?(?:\/[^?#]*)?$/i.test(url)&&!/^http:\/\/localhost(?::\d+)?(?:\/[^?#]*)?$/i.test(url))
    throw Error('Google Cloud için Worker adresini kaydet. API anahtarını siteye değil Worker Secret alanına gir.');
- const controller=new AbortController();abort=controller;
- let response;
- try{response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,lang,rate}),signal:controller.signal});}
- catch(e){if(!isCurrent(id)||e.name==='AbortError')return false;throw Error('Worker sunucusuna ulaşılamadı. URL ve CORS ayarlarını denetle.');}
+ // The key includes endpoint and language to prevent mixing different voices.
+ const cacheKey=JSON.stringify([url,lang,text]);
+ let blob=await readCachedAudio(cacheKey);
  if(!isCurrent(id))return false;
- if(!response.ok){let msg='';try{msg=String((await response.json()).error||'');}catch(_){}throw Error('Ses sunucusu '+response.status+' hatası: '+msg.slice(0,120));}
- const blob=await response.blob();if(!isCurrent(id))return false;
+ if(!blob){
+  const controller=new AbortController();abort=controller;
+  let response;
+  try{response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,lang,rate}),signal:controller.signal});}
+  catch(e){if(!isCurrent(id)||e.name==='AbortError')return false;throw Error('Worker sunucusuna ulaşılamadı. URL ve CORS ayarlarını denetle.');}
+  if(!isCurrent(id))return false;
+  if(!response.ok){let msg='';try{msg=String((await response.json()).error||'');}catch(_){}throw Error('Ses sunucusu '+response.status+' hatası: '+msg.slice(0,120));}
+  blob=await response.blob();if(!isCurrent(id))return false;
+  if(blob.size>0)void saveCachedAudio(cacheKey,blob);
+ }
  const blobUrl=URL.createObjectURL(blob),audio=new Audio(blobUrl);activeAudio=audio;audio.playbackRate=rate;
- return new Promise((resolve,reject)=>{
+ return new Promise(resolve=>{
   let finished=false;
   function finish(ok){if(finished)return;finished=true;pending=null;audio.onended=null;audio.onerror=null;URL.revokeObjectURL(blobUrl);activeAudio=null;resolve(ok);}
   pending=finish;audio.onended=()=>finish(true);audio.onerror=()=>finish(false);
