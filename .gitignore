@@ -1,8 +1,0 @@
-# Secret credentials must never be committed.
-.env
-.env.*
-!.env.example
-*.key
-*service-account*.json
-**/*.tmp
-node_modules/

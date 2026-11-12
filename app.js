@@ -1,4 +1,4 @@
-/* ISOByte Study Lab v4 — static educational site and prerecorded vocabulary audio. */
+/* ISOByte Study Lab v2 — offline-capable learning UI (external audio links require internet). */
 (() => {
 'use strict';
 const D=STUDY_DATA, B=BOOST;
@@ -8,7 +8,7 @@ let saved=null;
 try { saved=JSON.parse(localStorage.getItem(KEY)||'null'); } catch (_) {}
 const state={...defaultState(),...((saved&&typeof saved==='object'&&!Array.isArray(saved))?saved:{})};
 ['doneLessons','knownWords','listened','readDone','examHistory'].forEach(k=>{if(!Array.isArray(state[k]))state[k]=[];});
-const ui={route:'home',lesson:'preference',wordGroup:'yellow',wordQuery:'',showMeanings:true,flashIndex:0,flipped:false,flashOrder:{},audioUnit:'all',readingUnit:'all',practiceMode:'mixed',examScenario:'standard',sessions:{lessons:{},practice:{},exam:null},drafts:{},orderDrafts:{},orderLayouts:{},optionLayouts:{},voiceRate:StudyVoice.prefs.rate,voiceMode:StudyVoice.prefs.mode,speech:{active:false,index:0,total:0,mode:'en',token:0},toastTimeout:0};
+const ui={route:'home',lesson:'preference',wordGroup:'yellow',wordQuery:'',showMeanings:true,flashIndex:0,flipped:false,flashOrder:{},audioUnit:'all',readingUnit:'all',practiceMode:'mixed',examScenario:'standard',sessions:{lessons:{},practice:{},exam:null},drafts:{},orderDrafts:{},orderLayouts:{},optionLayouts:{},voiceRate:StudyVoice.prefs.rate,voiceMode:StudyVoice.prefs.mode,speech:{active:false,index:0,total:0,mode:'pair',token:0},toastTimeout:0};
 const labels={home:'Genel Bakış',lessons:'Konu Anlatımları',lesson:'Konu Anlatımı',vocab:'Sarı Kelimeler',practice:'Alıştırma Merkezi',audio:'Dinleme Rehberi',reading:'Okuma Rehberi',exam:'Yazılı Provası'};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -90,9 +90,9 @@ function vocab(){const d=deck(),w=d[limit(ui.flashIndex,0,d.length-1)],known=d.f
 const now=ui.speech.active?`Oynatılıyor: ${ui.speech.index}/${ui.speech.total}`:'Hazır · ses duymak için başlat';return `${pageTitle('SARI KELİMELER · SESLİ EZBER','Kelime Laboratuvarı','Kartlarla hatırla, İngilizce telaffuzu dinle ve 17 asıl sarı kelimeyi sırayla tekrar et.')}
 <div class="toolbar"><div class="segmented">${[['yellow','17 asıl sarı kelime'],['hobbies','12 hobi'],['pronounce','15 telaffuz']].map(x=>`<button data-action="word-group" data-id="${x[0]}" class="${ui.wordGroup===x[0]?'active':''}">${x[1]}</button>`).join('')}</div></div>
 <div class="grid-2 vocab-top"><div><div class="flashcard" data-action="flip-card" role="button" tabindex="0"><div class="flash-label">${ui.flipped?'TÜRKÇE':'KELİMEYİ HATIRLA · ÇEVİR'}</div><div class="word">${esc(ui.flipped?w.tr:w.w)}</div><div class="reveal">${ui.flipped?esc(w.w):'Anlamı görmek için çevir ↗'}</div>${w.example?`<div class="hint">${esc(w.example)}</div>`:''}</div><div class="flash-footer"><span class="muted text-sm">${ui.flashIndex+1}/${d.length} · ${known} öğrendim</span><div class="toolbar" style="margin:0"><button class="btn ghost sm" data-action="flash-prev">←</button><button class="btn ghost sm" data-action="speak-word" data-word="${esc(w.w)}">♫ Dinle</button><button class="btn secondary sm" data-action="known" data-word="${esc(w.w)}">${state.knownWords.includes(w.w)?'✓ Bildim':'Öğrendim ✓'}</button><button class="btn ghost sm" data-action="flash-next">→</button><button class="btn ghost sm" data-action="flash-shuffle">Karıştır</button></div></div></div>
-<div class="card voice-card"><div class="eyebrow">KELİME SESLENDİRME</div><h3>Duy, tekrar et, hatırla.</h3><p class="muted text-sm">Sabit kelimeler için Google HD kayıtları GitHub'da hazırlandığında doğrudan MP3 oynatılır. API çağrısı yapılmaz.</p>
-<div class="voice-form"><label>Tekrar türü<select id="voice-mode" aria-label="Sesli tekrar modu"><option value="en" ${ui.voiceMode==='en'?'selected':''}>Yalnız İngilizce</option><option value="pair" ${ui.voiceMode==='pair'?'selected':''}>İngilizce → Türkçe</option><option value="triple" ${ui.voiceMode==='triple'?'selected':''}>İngilizce → Türkçe → İngilizce</option></select></label><label>Konuşma hızı <b id="rate-label">${ui.voiceRate.toFixed(2)}×</b><input id="voice-rate" type="range" min="0.6" max="1.3" step="0.05" value="${ui.voiceRate}"/></label><label>Ses motoru<select id="voice-provider" aria-label="Ses motoru"><option value="recorded" ${StudyVoice.prefs.provider==='recorded'?'selected':''}>Kayıtlı MP3 (varsa)</option><option value="browser" ${StudyVoice.prefs.provider==='browser'?'selected':''}>Tarayıcı sesi</option></select></label></div>
-  <div class="voice-provider-info"><p>${StudyVoice.prefs.provider==='recorded'?(StudyVoice.status().availability==='ready'?`<strong>Google HD kayıtları hazır.</strong> ${StudyVoice.status().count} kelimenin İngilizce ve Türkçe MP3 dosyaları yerel olarak oynatılır.`:`<strong>Google MP3 paketi henüz yüklenmedi.</strong> Şimdilik tarayıcı sesi kullanılır; paket bir kez oluşturulunca site kendiliğinden kayıtlı sese geçer.`):`<strong>Tarayıcı sesi:</strong> ${esc(StudyVoice.bestVoice('en-US')?.name||'Sistem varsayılanı')}`}</p></div>
+<div class="card voice-card"><div class="eyebrow">KELİME SESLENDİRME</div><h3>Duy, tekrar et, hatırla.</h3><p class="muted text-sm">Tarayıcının mevcut sesleri ücretsizdir. Google Cloud seçeneği, daha doğal telaffuz için ayrıca yapılandırılabilir.</p>
+<div class="voice-form"><label>Tekrar türü<select id="voice-mode" aria-label="Sesli tekrar modu"><option value="en" ${ui.voiceMode==='en'?'selected':''}>Yalnız İngilizce</option><option value="pair" ${ui.voiceMode==='pair'?'selected':''}>İngilizce → Türkçe</option><option value="triple" ${ui.voiceMode==='triple'?'selected':''}>İngilizce → Türkçe → İngilizce</option></select></label><label>Konuşma hızı <b id="rate-label">${ui.voiceRate.toFixed(2)}×</b><input id="voice-rate" type="range" min="0.6" max="1.3" step="0.05" value="${ui.voiceRate}"/></label><label>Ses motoru<select id="voice-provider" aria-label="Ses motoru"><option value="browser" ${StudyVoice.prefs.provider==='browser'?'selected':''}>Tarayıcı · ücretsiz</option><option value="google" ${StudyVoice.prefs.provider==='google'?'selected':''}>Google Cloud · HD sesler</option></select></label></div>
+<div class="voice-provider-info">${StudyVoice.prefs.provider==='google'?`<label class="endpoint-label">Cloudflare Worker adresi<input id="voice-endpoint" type="url" value="${esc(StudyVoice.prefs.endpoint)}" placeholder="https://....workers.dev" autocomplete="off" spellcheck="false"/></label><p>Google API anahtarını <strong>buraya yazma.</strong> Anahtarı Worker secret olarak sakla. <a href="https://github.com/ISOByte00/1.1-ing-yazili#google-cloud-tts-kurulumu" target="_blank" rel="noopener noreferrer">Kurulum rehberi</a>.</p>`:`<p>Seçilen İngilizce ses: <strong>${esc(StudyVoice.bestVoice('en-US')?.name||'Sistem varsayılanı')}</strong>. Google/Microsoft doğal sesler cihazında varsa öncelikli kullanılır.</p>`}</div>
 <div class="voice-controls"><button class="btn" data-action="speak-all" ${ui.speech.active?'disabled':''}>▶ ${d.length} kelimeyi sırayla dinle</button><button class="btn ghost" data-action="speech-stop" ${!ui.speech.active?'disabled':''}>■ Durdur</button></div><p class="voice-status" aria-live="polite">${now}</p>
 <div class="progress-track spaced"><span style="width:${Math.round(100*known/d.length)}%"></span></div><p class="filter-caption">${known}/${d.length} kelime öğrenildi olarak işaretlendi.</p></div></div>
 ${heading(wordGroupName(ui.wordGroup),'Kitap sayfasıyla birlikte anlamını, örneğini ve telaffuzunu çalış.')}
@@ -138,44 +138,25 @@ function changeOrder(uid,pos,remove=false){const s=currentSessionForItem(uid);if
 function changeMatch(uid,index,value){const s=currentSessionForItem(uid);if(!s||s.submitted)return;const item=itemFor(s,uid);if(!item||checked(s,item))return;const a=Array.isArray(s.answers[uid])?[...s.answers[uid]]:Array(item.q.type==='match'?item.q.pairs.length:item.q.items.length).fill('');a[index]=value;s.answers[uid]=a;render();}
 function appendBatch(s,n){const existing=s.items.map(x=>x.q.id),added=pick(s.topic,n,existing);if(!added.length){toast('Bu bölümdeki tüm sorular eklendi.');return;}s.items.push(...added);render();toast(`${added.length} yeni soru eklendi; önceki cevapların duruyor.`);}
 function speakWord(str,lang='en-US'){
-  stopSpeech(false);
-  const t=StudyVoice.start();
-  StudyVoice.say(str,lang,ui.voiceRate,t).then(ok=>{
-    if(!ok&&StudyVoice.isCurrent(t))toast('Ses başlatılamadı; ses motorunu veya cihaz ayarlarını kontrol et.');
-  }).catch(err=>{if(StudyVoice.isCurrent(t))toast(err.message||'Seslendirme başarısız.');});
+ stopSpeech(false);
+ const t=StudyVoice.start();
+ StudyVoice.say(str,lang,ui.voiceRate,t).then(ok=>{if(!ok&&StudyVoice.isCurrent(t))toast('Ses başlatılamadı; ses motorunu veya cihaz ayarlarını kontrol et.');}).catch(err=>{if(StudyVoice.isCurrent(t))toast(err.message||'Seslendirme başarısız.');});
 }
-function stopSpeech(refresh=true){
-  ui.speech.token++;
-  StudyVoice.stop();
-  ui.speech.active=false;
-  if(refresh)render();
-}
+function stopSpeech(refresh=true){ui.speech.token++;StudyVoice.stop();ui.speech.active=false;if(refresh)render();}
 async function speechLoop(){
-  if(ui.speech.active)stopSpeech(false);
-  const token=++ui.speech.token;
-  const engineToken=StudyVoice.start();
-  const words=deck(),parts=[];
-  for(const w of words){
-    parts.push([w.w,'en-US']);
-    if(ui.voiceMode!=='en')parts.push([w.tr,'tr-TR']);
-    if(ui.voiceMode==='triple')parts.push([w.w,'en-US']);
-  }
-  ui.speech.active=true;
-  ui.speech.total=words.length;
-  ui.speech.index=0;
-  ui.speech.mode=ui.voiceMode;
-  render();
-  for(let i=0;i<parts.length;i++){
-    if(token!==ui.speech.token || !StudyVoice.isCurrent(engineToken))return;
-    ui.speech.index=Math.floor(i/(ui.voiceMode==='triple'?3:ui.voiceMode==='pair'?2:1))+1;
-    const [content,lang]=parts[i];
-    render();
-    let ok=false;
-    try {ok=await StudyVoice.say(content,lang,ui.voiceRate,engineToken);}
-    catch(err){if(token===ui.speech.token){stopSpeech();toast(err.message||'Ses servisi durdu.');}return;}
-    if(!ok){if(token===ui.speech.token){stopSpeech();toast('Ses servisi durdu. Farklı bir ses motoru seçebilirsin.');}return;}
-  }
-  if(token===ui.speech.token){ui.speech.active=false;render();toast('Sesli tekrar tamamlandı.');}
+ if(ui.speech.active)stopSpeech(false);
+ const token=++ui.speech.token,engineToken=StudyVoice.start(),words=deck(),parts=[];
+ for(const w of words){parts.push([w.w,'en-US']);if(ui.voiceMode!=='en')parts.push([w.tr,'tr-TR']);if(ui.voiceMode==='triple')parts.push([w.w,'en-US']);}
+ ui.speech.active=true;ui.speech.total=words.length;ui.speech.index=0;ui.speech.mode=ui.voiceMode;render();
+ for(let i=0;i<parts.length;i++){
+  if(token!==ui.speech.token||!StudyVoice.isCurrent(engineToken))return;
+  ui.speech.index=Math.floor(i/(ui.voiceMode==='triple'?3:ui.voiceMode==='pair'?2:1))+1;
+  const [content,lang]=parts[i];render();let ok=false;
+  try{ok=await StudyVoice.say(content,lang,ui.voiceRate,engineToken);}
+  catch(err){if(token===ui.speech.token){stopSpeech();toast(err.message||'Ses servisi durdu.');}return;}
+  if(!ok){if(token===ui.speech.token){stopSpeech();toast('Ses servisi durdu. Farklı bir ses motoru seçebilirsin.');}return;}
+ }
+ if(token===ui.speech.token){ui.speech.active=false;render();toast('Sesli tekrar tamamlandı.');}
 }
 function render(){const route=ui.route;const views={home,lessons,lesson,vocab,practice,reading,audio,exam};$('#view').innerHTML=(views[route]||home)();$('#crumb-current').textContent=route==='lesson'?lessonById(ui.lesson).title:labels[route];document.querySelectorAll('.nav-item[data-route]').forEach(x=>x.classList.toggle('active',x.dataset.route===(route==='lesson'?'lessons':route)));const m=metrics();$('#sidebar-progress-pct').textContent=m.pct+'%';$('#sidebar-progress-bar').style.width=m.pct+'%';document.body.classList.toggle('dark',!!state.dark);}
 function handleClick(el){const a=el.dataset.action,id=el.dataset.id,uid=el.dataset.uid,pos=Number(el.dataset.pos);switch(a){
@@ -209,12 +190,11 @@ case 'reading-complete':toggle(state.readDone,id);render();break;
 }}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-action]');if(el){if(el.matches(':disabled'))return;handleClick(el);return;}const nav=e.target.closest('.nav-item[data-route]');if(nav)go(nav.dataset.route);});
 document.addEventListener('keydown',e=>{if(!['Enter',' '].includes(e.key))return;const el=e.target.closest('[data-action][role="button"]');if(el){e.preventDefault();handleClick(el);}});
-document.addEventListener('change',e=>{const t=e.target;if(t.matches('[data-audio]')){toggle(state.listened,t.dataset.audio);render();}if(t.matches('[data-match-uid]'))changeMatch(t.dataset.matchUid,Number(t.dataset.sub),t.value);if(t.id==='voice-mode'){ui.voiceMode=t.value;StudyVoice.setPref('mode',t.value);}if(t.id==='voice-provider'){StudyVoice.stop();StudyVoice.setPref('provider',t.value);render();}});
+document.addEventListener('change',e=>{const t=e.target;if(t.matches('[data-audio]')){toggle(state.listened,t.dataset.audio);render();}if(t.matches('[data-match-uid]'))changeMatch(t.dataset.matchUid,Number(t.dataset.sub),t.value);if(t.id==='voice-mode'){ui.voiceMode=t.value;StudyVoice.setPref('mode',t.value);}if(t.id==='voice-provider'){StudyVoice.stop();StudyVoice.setPref('provider',t.value);render();}if(t.id==='voice-endpoint'){StudyVoice.setPref('endpoint',t.value);toast('Worker adresi kaydedildi.');}});
 document.addEventListener('input',e=>{const t=e.target;if(t.id==='word-search'){const v=t.value,pos=t.selectionStart;ui.wordQuery=v;render();const n=$('#word-search');n?.focus();try{n?.setSelectionRange(pos,pos);}catch(_){}}if(t.matches('[data-input-answer]')){const s=currentSessionForItem(t.dataset.inputAnswer);if(s&&!s.submitted)s.answers[t.dataset.inputAnswer]=t.value;}if(t.id==='voice-rate'){ui.voiceRate=Number(t.value);const x=$('#rate-label');if(x)x.textContent=ui.voiceRate.toFixed(2)+'×';StudyVoice.setPref('rate',ui.voiceRate);}});
 $('#reset-button').addEventListener('click',()=>{if(!confirm('Öğrenilen kelimeler, okunma işaretleri ve deneme sonuçlarını sıfırlamak istiyor musun?'))return;stopSpeech(false);Object.assign(state,defaultState());ui.sessions={lessons:{},practice:{},exam:null};persist();render();toast('Çalışma geçmişi sıfırlandı.');});
 $('#theme-toggle').addEventListener('click',()=>{state.dark=!state.dark;persist();render();});
 $('#menu-toggle').addEventListener('click',()=>{$('#sidebar').classList.add('open');$('#menu-shade').classList.add('show');});
 $('#menu-shade').addEventListener('click',()=>{$('#sidebar').classList.remove('open');$('#menu-shade').classList.remove('show');});
 render();
-StudyVoice.prepare().then(()=>{if(ui.route==='vocab')render();});
 })();
